@@ -3,8 +3,10 @@
 int x,y = 0;
 
 void send_command(lcd_t * lcd, uint8_t cmd){
+	
 	HAL_GPIO_WritePin(lcd->en_port, lcd->en_pin, GPIO_PIN_SET);
 	HAL_GPIO_WritePin(lcd->rs_port, lcd->rs_pin, GPIO_PIN_RESET);
+	
 	if(lcd->mode == _8_BIT){
 		for(int i=0; i<8 ; i++){
 			HAL_GPIO_WritePin(lcd->data_ports[i], lcd->data_pins[i], !!(cmd & (1<<i)) ? GPIO_PIN_RESET : GPIO_PIN_SET );
@@ -26,6 +28,7 @@ void send_command(lcd_t * lcd, uint8_t cmd){
 	}
 	HAL_GPIO_WritePin(lcd->en_port, lcd->en_pin, GPIO_PIN_RESET);
 }
+
 void lcd_shift_cursor_R(lcd_t * lcd){
 	x++;
 	if (x == 16){
@@ -72,17 +75,35 @@ void lcd_shift_cursor_L(lcd_t * lcd){
 
 void lcd_init(lcd_t * lcd)
 {
-	HAL_GPIO_WritePin(lcd->en_port, lcd->en_pin, GPIO_PIN_SET);
-	HAL_GPIO_WritePin(lcd->rs_port, lcd->rs_pin, GPIO_PIN_SET);
+	__GPIOA_CLK_ENABLE();
+	GPIO_InitTypeDef LCD_O;
+	LCD_O.Mode = GPIO_MODE_OUTPUT_PP;
+	LCD_O.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+	LCD_O.Pull  = GPIO_NOPULL;
 	
-	HAL_GPIO_WritePin(lcd->data_ports[0], lcd->data_pins[0], GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(lcd->data_ports[1], lcd->data_pins[1], GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(lcd->data_ports[2], lcd->data_pins[2], GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(lcd->data_ports[3], lcd->data_pins[3], GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(lcd->data_ports[4], lcd->data_pins[4], GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(lcd->data_ports[5], lcd->data_pins[5], GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(lcd->data_ports[6], lcd->data_pins[6], GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(lcd->data_ports[7], lcd->data_pins[7], GPIO_PIN_RESET);
+	LCD_O.Pin = lcd->rs_pin;
+	HAL_GPIO_Init(lcd->rs_port, &LCD_O);
+	
+	LCD_O.Pin = lcd->en_pin;
+	HAL_GPIO_Init(lcd->en_port, &LCD_O);
+	
+	for( uint8_t i=0; i<8; i++)
+	{
+		LCD_O.Pin  = lcd->data_pins[i];
+		HAL_GPIO_Init(lcd->data_ports[i], &LCD_O);
+	}
+	
+  HAL_GPIO_WritePin(lcd->en_port, lcd->en_pin, GPIO_PIN_RESET);
+	HAL_Delay(40);
+	if(lcd->mode == _8_BIT)
+		send_command(lcd, 0x38);
+	else
+		send_command(lcd, 0x28);
+	
+	
+	send_command(lcd, 0x0E); //display on, cursor blinking
+	send_command(lcd, 0x01); //clear LCD
+	
 }
 
 void lcd_putchar(lcd_t * lcd, uint8_t character)
