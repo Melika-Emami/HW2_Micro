@@ -1,6 +1,31 @@
 #include "lm016.h"
+
 int x,y = 0;
 
+void send_command(lcd_t * lcd, uint8_t cmd){
+	HAL_GPIO_WritePin(lcd->en_port, lcd->en_pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(lcd->rs_port, lcd->rs_pin, GPIO_PIN_RESET);
+	if(lcd->mode == _8_BIT){
+		for(int i=0; i<8 ; i++){
+			HAL_GPIO_WritePin(lcd->data_ports[i], lcd->data_pins[i], !!(cmd & (1<<i)) ? GPIO_PIN_RESET : GPIO_PIN_SET );
+		}
+	}
+	else if(lcd->mode == _4_BIT){
+		
+		for(int i=4; i<8 ; i++){
+			HAL_GPIO_WritePin(lcd->data_ports[i], lcd->data_pins[i], !!(cmd & (1<<i)) ? GPIO_PIN_RESET : GPIO_PIN_SET );
+		}
+		
+		HAL_GPIO_WritePin(lcd->en_port, lcd->en_pin, GPIO_PIN_RESET);
+		HAL_Delay(1);
+		HAL_GPIO_WritePin(lcd->en_port, lcd->en_pin, GPIO_PIN_SET);
+		for(int i=4; i<8 ; i++){
+			HAL_GPIO_WritePin(lcd->data_ports[i], lcd->data_pins[i], !!(cmd & (1<<(i-4))) ? GPIO_PIN_RESET : GPIO_PIN_SET );
+		}
+		
+	}
+	HAL_GPIO_WritePin(lcd->en_port, lcd->en_pin, GPIO_PIN_RESET);
+}
 void lcd_shift_cursor_R(lcd_t * lcd){
 	x++;
 	if (x == 16){
