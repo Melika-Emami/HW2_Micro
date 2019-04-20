@@ -1,0 +1,25 @@
+--cpu=Cortex-M4.fp
+"hw2\startup_stm32f407xx.o"
+"hw2\system_stm32f4xx.o"
+"hw2\stm32f4xx_hal_msp.o"
+"hw2\stm32f4xx_it.o"
+"hw2\main.o"
+"hw2\lm016.o"
+"hw2\stm32f4xx_hal_rcc_ex.o"
+"hw2\stm32f4xx_hal_flash.o"
+"hw2\stm32f4xx_hal_dma_ex.o"
+"hw2\stm32f4xx_hal_dma.o"
+"hw2\stm32f4xx_hal.o"
+"hw2\stm32f4xx_hal_flash_ex.o"
+"hw2\stm32f4xx_hal_tim.o"
+"hw2\stm32f4xx_hal_pwr.o"
+"hw2\stm32f4xx_hal_rcc.o"
+"hw2\stm32f4xx_hal_gpio.o"
+"hw2\stm32f4xx_hal_tim_ex.o"
+"hw2\stm32f4xx_hal_flash_ramfunc.o"
+"hw2\stm32f4xx_hal_cortex.o"
+"hw2\stm32f4xx_hal_pwr_ex.o"
+--library_type=microlib --strict --scatter "HW2\HW2.sct"
+--summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list "HW2.map" -o HW2\HW2.axf
