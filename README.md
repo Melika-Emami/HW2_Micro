@@ -1,1 +1,1 @@
-# Library for LM016
+# Library for LCD(LM016)
